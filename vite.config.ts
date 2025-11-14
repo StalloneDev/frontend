@@ -35,7 +35,12 @@ export default defineConfig({
 			"/api": {
 				target: "http://127.0.0.1:5000",
 				changeOrigin: true,
-				secure: false,
+      secure: false,
+      configure: (proxy) => {
+        proxy.on("proxyReq", (proxyReq) => {
+          proxyReq.setHeader("origin", "http://127.0.0.1:5000");
+        });
+      },
 			},
 		},
 		fs: {
