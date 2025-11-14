@@ -19,10 +19,7 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// 🔥 Fonction pour récupérer le token
-function getToken() {
-  return localStorage.getItem("token");
-}
+
 
 export async function apiRequest(
   method: string,
@@ -30,18 +27,16 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
 
-  const token = getToken();
-
   const headers: Record<string, string> = {};
 
   if (data) headers["Content-Type"] = "application/json";
-  if (token) headers["Authorization"] = `Bearer ${token}`; // 🔥 important
 
   const res = await fetch(withBase(url), {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: API_BASE ? "include" : "same-origin",
+    // credentials: API_BASE ? "include" : "same-origin",
+    credentials: "include",
   });
 
   await throwIfResNotOk(res);
@@ -55,12 +50,10 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const path = Array.isArray(queryKey) ? String(queryKey[0]) : String(queryKey);
-    const token = getToken();
+    
     const res = await fetch(withBase(path), {
-      headers: token
-        ? { Authorization: `Bearer ${token}` } // 🔥 pour les GET protégés
-        : {},
-      credentials: API_BASE ? "include" : "same-origin",
+      headers: {},
+      credentials: "include",
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

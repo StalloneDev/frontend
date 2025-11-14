@@ -37,8 +37,7 @@ export default function Login() {
       const result = await apiRequest("POST", "/api/auth/login", data);
       return result;
     },
-    onSuccess: (data: any) => {
-      localStorage.setItem("token", data.token);
+    onSuccess: () => {
       toast({
         title: "Connexion réussie",
         description: "Bienvenue dans l'application de suivi des chargements",
