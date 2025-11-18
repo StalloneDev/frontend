@@ -1,6 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+
 
 function withBase(path: string) {
   if (/^https?:\/\//i.test(path)) {
@@ -9,7 +9,7 @@ function withBase(path: string) {
   if (!path.startsWith("/")) {
     path = `/${path}`;
   }
-  return `${API_BASE}${path}`;
+  return path;
 }
 
 async function throwIfResNotOk(res: Response) {
@@ -35,7 +35,6 @@ export async function apiRequest(
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
-    // credentials: API_BASE ? "include" : "same-origin",
     credentials: "include",
   });
 

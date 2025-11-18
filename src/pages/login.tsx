@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,12 +37,15 @@ export default function Login() {
       const result = await apiRequest("POST", "/api/auth/login", data);
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (userData) => {
+      queryClient.setQueryData(["/api/auth/me"], userData);
       toast({
         title: "Connexion réussie",
         description: "Bienvenue dans l'application de suivi des chargements",
       });
-      setLocation("/dashboard");
+      setTimeout(() => {
+        setLocation("/");
+      }, 100);
     },
     onError: (error: any) => {
       toast({
