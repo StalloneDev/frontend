@@ -42,7 +42,7 @@ export default function Login() {
         title: "Connexion réussie",
         description: "Bienvenue dans l'application de suivi des chargements",
       });
-      setLocation("/");
+      setLocation("/dashboard");
     },
     onError: (error: any) => {
       toast({
