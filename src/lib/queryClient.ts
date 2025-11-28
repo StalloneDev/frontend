@@ -14,21 +14,11 @@ function withBase(path: string) {
   return `${API_BASE_URL || ""}${path}`;
 }
 
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
-  }
-}
-
-
-
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown 
+  data?: unknown
 ): Promise<any> {
-
   const headers: Record<string, string> = {};
 
   if (data) headers["Content-Type"] = "application/json";
@@ -40,8 +30,14 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
-  return res.json();
+  if (!res.ok) {
+    const text = (await res.text()) || res.statusText;
+    throw new Error(`${res.status}: ${text}`);
+  }
+
+  // Gracefully handle empty responses
+  const text = await res.text();
+  return text ? JSON.parse(text) : {};
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -50,8 +46,10 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const path = Array.isArray(queryKey) ? String(queryKey[0]) : String(queryKey);
-    
+    const path = Array.isArray(queryKey)
+      ? String(queryKey[0])
+      : String(queryKey);
+
     const res = await fetch(withBase(path), {
       headers: {},
       credentials: "include",
@@ -61,8 +59,14 @@ export const getQueryFn: <T>(options: {
       return null;
     }
 
-    await throwIfResNotOk(res);
-    return await res.json();
+    if (!res.ok) {
+      const text = (await res.text()) || res.statusText;
+      throw new Error(`${res.status}: ${text}`);
+    }
+
+    // Gracefully handle empty responses
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
   };
 
 export const queryClient = new QueryClient({
