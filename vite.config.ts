@@ -41,14 +41,14 @@ export default defineConfig({
         allowedHosts: true,
 		proxy: {
 			"/api": {
-				target: process.env.VITE_API_URL || "https://suivi-backend.vercel.app",
+				target: process.env.VITE_API_BASE_URL || "https://suivi-backend.vercel.app",
 				changeOrigin: true,
       secure: false,
 	  cookieDomainRewrite: "",
       cookiePathRewrite: "/",
       configure: (proxy) => {
         proxy.on("proxyReq", (proxyReq) => {
-          proxyReq.setHeader("origin", process.env.VITE_API_URL || "https://suivi-backend.vercel.app");
+          proxyReq.setHeader("origin", process.env.VITE_API_BASE_URL || "https://suivi-backend.vercel.app");
         });
       },
 			},
