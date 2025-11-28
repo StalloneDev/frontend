@@ -1,6 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function withBase(path: string) {
   if (/^https?:\/\//i.test(path)) {
@@ -9,13 +10,13 @@ function withBase(path: string) {
   if (!path.startsWith("/")) {
     path = `/${path}`;
   }
-  return path;
+  return `${API_BASE_URL || ""}${path}`;
 }
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    // throw new Error(`${res.status}: ${text}`);
   }
 }
 
@@ -37,9 +38,14 @@ export async function apiRequest(
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
+  if (!res.ok) {
+    const text = (await res.text()) || res.statusText;
+    throw new Error(`${res.status}: ${text}`);
+  }
 
-  await throwIfResNotOk(res);
-  return res.json();
+  // Gracefully handle empty responses
+  const text = await res.text();
+  return text ? JSON.parse(text) : {};
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -48,7 +54,9 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const path = Array.isArray(queryKey) ? String(queryKey[0]) : String(queryKey);
+    const path = Array.isArray(queryKey)
+      ? String(queryKey[0])
+      : String(queryKey);
     
     const res = await fetch(withBase(path), {
       headers: {},
@@ -59,8 +67,14 @@ export const getQueryFn: <T>(options: {
       return null;
     }
 
-    await throwIfResNotOk(res);
-    return await res.json();
+    if (!res.ok) {
+      const text = (await res.text()) || res.statusText;
+      throw new Error(`${res.status}: ${text}`);
+    }
+
+    // Gracefully handle empty responses
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
   };
 
 export const queryClient = new QueryClient({

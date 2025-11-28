@@ -3,14 +3,11 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
-import { cartographer } from "@replit/vite-plugin-cartographer";
-import { devBanner } from "@replit/vite-plugin-dev-banner";
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const isReplit = process.env.REPL_ID !== undefined;
-const isDevelopment = process.env.NODE_ENV !== "production";
 
 export default defineConfig({
 	plugins: [
@@ -41,14 +38,14 @@ export default defineConfig({
         allowedHosts: true,
 		proxy: {
 			"/api": {
-				target: process.env.VITE_API_URL || "https://suivi-backend.vercel.app",
+				target: process.env.VITE_API_BASE_URL || "https://suivi-backend.vercel.app",
 				changeOrigin: true,
       secure: false,
 	  cookieDomainRewrite: "",
       cookiePathRewrite: "/",
       configure: (proxy) => {
         proxy.on("proxyReq", (proxyReq) => {
-          proxyReq.setHeader("origin", process.env.VITE_API_URL || "https://suivi-backend.vercel.app");
+          proxyReq.setHeader("origin", process.env.VITE_API_BASE_URL || "https://suivi-backend.vercel.app");
         });
       },
 			},
